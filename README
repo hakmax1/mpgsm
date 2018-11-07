@@ -1,1 +1,6 @@
 Project description
+
+
+
+Модем WAVECOM
+Подключение через self.uGSM = UART(1, baudrate=115200, rx=22, tx=23, timeout=3000)
