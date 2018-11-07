@@ -3,7 +3,7 @@
 #
 #
 #
-#   cd ~/esp/mpgsmgit/
+#   cd ~/esp/mpgsmgcv/mpgsm/
 #   ampy --port COM8 put wavecom.py
 #   ampy --port COM8 run mpgsm.py
 #   import mpgsm
