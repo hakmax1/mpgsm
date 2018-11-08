@@ -1,6 +1,26 @@
 Project description
 
 
+cd ~/esp/mpgsmcv/mpgsm/
+ampy --port COM10 put wavecom.py
+
+
+
+После прерывания, запустить можно
+mpgsm.device.MainWavecom()
+
+
+
+mpgsm.device.en485pin.value(1)
+mpgsm.device.GetDevData(1)
+mpgsm.device.en485pin.value(0)
+
+команда от сервера
+{"cmd":"SETDATA","ID":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}
+
+ModBUS для 485
+self.uDevice = UART(2, baudrate=9600, rx=16, tx=17, timeout=3000)
+
 
 Модем WAVECOM
 Подключение через self.uGSM = UART(1, baudrate=115200, rx=22, tx=23, timeout=3000)

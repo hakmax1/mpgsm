@@ -149,10 +149,14 @@ class wavecom:
                 while(True):
                     stroka.remove('')
             except ValueError:
-                print("except ValueError in _get_str_from_line is ok")
+                #print("except ValueError in _get_str_from_line is ok")
                 pass
             if (len(stroka) > 0):
+                print("_get_str_from_line(self,ln) len(stroka) > 0")
                 return stroka[0]
+            else:
+                print("_get_str_from_line(self,ln) len(stroka) = 0")
+                return None
         return None
 
     def cb_exec_at_data(self,data):

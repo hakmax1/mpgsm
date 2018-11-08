@@ -111,10 +111,15 @@ class ModBus:
         data_out.extend(addr)
 
     def _add_crc_to_bytearray_(self, buff):
-        crc = calc_crc(buff)
-
-        data_out.extend(crc)
-        data_out.extend(crc >> 8)
+        crc = self.calc_crc(buff)
+        print("crc")
+        print(crc)
+        #data_out = bytearray()
+        #data_out.extend(buff)
+        #print(data_out)
+        buff.extend(crc.to_bytes(2,'big'))
+        #data_out.extend(crc >> 8)
+        print(buff)
         return buff
 
     def calc_crc(self,buff):
@@ -123,18 +128,35 @@ class ModBus:
         while (i < len(buff)):
             crc = self.crc16(crc,buff[i])
             i = i+1
-        return crc
+        buff = crc
+        buff = buff >> 8
+        buff = buff | ((crc << 8) & 0xff00)
+        return buff
 
     def crc16(self,crc,newByte):
         crc = crc^newByte
         #for i=0; i<8; ++i
+
+        i = 0
+        while (i < 8):
+            if (crc & 1):
+                crc = (crc >> 1) ^ 0xA001
+            else:
+                crc = crc >> 1
+            i = i + 1
+
+        return crc
+
+        """
+        
         if(crc&1):
             crc = (crc>>1)^0xA001
         else:
             crc = crc>>1
 
         return crc
-        pass
+        """
+
 
 
 
@@ -184,6 +206,8 @@ class Device:
 
 
         self.StartThrTimePolSec()
+
+        self.modbus = ModBus()
 
         # Для SIM800
         # gsm.debug(True)
@@ -287,6 +311,10 @@ class Device:
         #   if (self.isConnect == True):
         #       self.DisconnectGSM()
 
+    """
+        Основная ф-ция для объекта
+        
+    """
     def MainWavecom(self):
 
         try:
@@ -340,8 +368,11 @@ class Device:
             print("MainWavecom except KeyboardInterrupt")
             self.StopThrTimePolSec()
 
-        except Exception:
+        except Exception as e:
+
             print("MainWavecom except Exception")
+            print(e)
+            sys.print_exception(e)
             self.StopThrTimePolSec()
 
 
@@ -362,10 +393,14 @@ class Device:
 
     def GetDevData(self, dev):
         # Получить данные ус-ва
+        #buff = bytearray([0x01, 0x03, 0x20, 0x00, 0x00, 0x04, 0x4f, 0xc9])
         data_out = bytearray()
         data_out.extend(struct.pack('b', dev))
-        data_out.extend(b'\xaa')
-        # print("write data",data_out)
+        data_out.extend(b'\x03\x20\x00\x00\x0C')
+        self.modbus._add_crc_to_bytearray_(data_out)
+        #ModBus._add_crc_to_bytearray_(data_out)
+        #data_out.extend(b'\x')
+        print("write data",data_out)
         self._send_req_(data_out)
         data = self._read_ans_()
         if (len(data) == 0):
@@ -392,11 +427,17 @@ class Device:
                 num_byte += 1
             else:
                 is_data_read = True
+        print("read_buff = ")
+        print(read_buff)
         return read_buff
 
     def _send_req_(self, req):
         # Включаем передатчик
-        self.uDevice.write(req)
+        self.en485pin.value(1)
+        print(self.uDevice.write(req))
+        print(self.uDevice.any())
+        time.sleep(0.01)
+        self.en485pin.value(0)
         # Выключаем передатчик
         #   Ждем ответа, если ответ пришел отправляем данные на сервер,
         #   если ответа нет или повторяем или отправляем серверу ошибку
@@ -422,7 +463,7 @@ class Device:
             print("in_data = ", in_data)
             print("-----_analis_server_socket_buff_------")
 
-            self._send_data_to_server_(in_data)
+            #self._send_data_to_server_(in_data)
             # Смотрим какая команда пришла
             if (in_data.get("cmd") == "GETALLDATA"):
                 # пришла команда опроса всех ус-в
@@ -474,8 +515,16 @@ class Device:
                 print("data_out = ", data_out)
 
         except OSError as e:
-            print("!!!!!!!!!!!!!!!  except in _analis_server_socket_buff_   !!!!!!!!")
+            print("!!!!!!!!!!!!!!!  except OSError in _analis_server_socket_buff_   !!!!!!!!")
             print(e)
+        except Exception as e:
+            print("!!!!!!!!!!!!!!!  except Exception in _analis_server_socket_buff_   !!!!!!!!")
+            print(e)
+        else:
+            #исключения не было
+            print("!!!!!!!!!!!!!!!  except else in _analis_server_socket_buff_   !!!!!!!!")
+        finally:
+            print("!!!!!!!!!!!!!!!  except finally in _analis_server_socket_buff_   !!!!!!!!")
         # Анализируем входной буффер сервер соккета
         pass
 
