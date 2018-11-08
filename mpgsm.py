@@ -420,6 +420,7 @@ class Device:
         is_data_read = False
         num_byte = 0
         read_buff = bytearray()
+
         while (is_data_read != True):
             bt = self.uDevice.read(1)
             if (len(bt) != 0):
@@ -427,8 +428,11 @@ class Device:
                 num_byte += 1
             else:
                 is_data_read = True
-        print("read_buff = ")
-        print(read_buff)
+            # Проверяем переполнение буффера
+            if(len(read_buff)>100):
+                read_buff.clear()
+                self.uDevice.flush()
+                return read_buff
         return read_buff
 
     def _send_req_(self, req):
