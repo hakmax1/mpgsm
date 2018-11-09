@@ -391,6 +391,9 @@ class Device:
         print("del uDevice")
         self.uDevice.deinit()
 
+    """
+        Получить все данные от усв-ва
+    """
     def GetDevData(self, dev):
         # Получить данные ус-ва
         #buff = bytearray([0x01, 0x03, 0x20, 0x00, 0x00, 0x04, 0x4f, 0xc9])
@@ -403,12 +406,68 @@ class Device:
         print("write data",data_out)
         self._send_req_(data_out)
         data = self._read_ans_()
+        print("data = ", data)
+        print("len(data) = ", len(data))
+        if(len(data)>25):
+            self._alldata_modbus_to_strct_(data)
         if (len(data) == 0):
             data = '{Errore}'
         else:
             data = "{Ok}"
         #data = data_out
         return data
+
+    """
+        анализируем входной буффер
+    """
+    def _alldata_modbus_to_strct_(self,buff):
+        try:
+            # buff = bytearray([6, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5 ,5 ,5,6,7,7])
+            print("_alldata_modbus_to_strct_ buff len", len(buff))
+            print("_alldata_modbus_to_strct_ buff",buff[3],buff[4],buff[5],buff[6],buff[7],buff[8])
+
+            data_device = {}
+            data_device["devID"] = buff[0]
+            data_u_in = struct.unpack('H', buff[3:5])
+            data_u_out = struct.unpack('H', buff[5:7])
+            data_i_in = struct.unpack('H', buff[7:9])
+            data_i_out = struct.unpack('H', buff[9:11])
+            data_kpd = struct.unpack('H', buff[11:13])
+            data_temper = struct.unpack('H', buff[13:15])
+            data_reg_state = struct.unpack('H', buff[15:17])
+
+            data_u_ust_local = struct.unpack('H', buff[17:19])
+            data_i_ust_local = struct.unpack('H', buff[19:21])
+
+            data_u_ust_dist = struct.unpack('H', buff[21:23])
+            data_i_ust_dist = struct.unpack('H', buff[23:25])
+
+            data_reg_upr = struct.unpack('H', buff[25:27])
+
+
+
+            data_device["Uinput"] = data_u_in
+            data_device["Uoutput"] = data_u_out
+            data_device["Iinput"] = data_i_in
+            data_device["Ioutput"] = data_i_out
+            data_device["KPD"] = data_kpd
+            data_device["Temer"] = data_temper
+            data_device["RegState"] = data_reg_state
+            data_device["Udist"] = data_u_ust_local
+            data_device["Idist"] = data_i_ust_local
+            data_device["Ulocal"] = data_u_ust_dist
+            data_device["Ilocal"] = data_i_ust_dist
+            data_device["RegUpr"] = data_reg_upr
+
+            data_to_server = {}
+            data_to_server["msg"] = data_device
+            data_to_server["timestamp"] = "10:10:10"
+            print(data_to_server)
+
+            return data_to_server
+        except NameError as e:
+            print(e)
+        pass
 
     def GetAllData(self):
         for dev in self.dict_devices:
@@ -422,14 +481,25 @@ class Device:
         read_buff = bytearray()
 
         while (is_data_read != True):
-            bt = self.uDevice.read(1)
-            if (len(bt) != 0):
-                read_buff.extend(chr(bt[0]))
-                num_byte += 1
+            bts = self.uDevice.read(1)
+            #print("bts = ",bts)
+            if (len(bts) != 0):
+                bt = bts[0]
+                #bt = ~bt
+                if(len(read_buff)==0):
+                    if(bt!=0):
+                        print("type(bt) = ",type(bt))
+                        print("bt = ", bt)
+                        read_buff.append(bt)
+                        num_byte += 1
+                else:
+                    read_buff.append(bt)
+                    num_byte += 1
             else:
                 is_data_read = True
             # Проверяем переполнение буффера
             if(len(read_buff)>100):
+                print("!!!!!!!!!!!!!!!!   Error Overflow modbus in buffer")
                 read_buff.clear()
                 self.uDevice.flush()
                 return read_buff
@@ -441,7 +511,9 @@ class Device:
         print(self.uDevice.write(req))
         print(self.uDevice.any())
         time.sleep(0.01)
+        #self.uDevice.flush()
         self.en485pin.value(0)
+
         # Выключаем передатчик
         #   Ждем ответа, если ответ пришел отправляем данные на сервер,
         #   если ответа нет или повторяем или отправляем серверу ошибку

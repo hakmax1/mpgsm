@@ -2,9 +2,28 @@
     Ф-ции для работы с ModBus
     Попробуем запихнуть в класс, с возможностью переноса алгоритма на СИ
 
+
 from machine import UART
 from machine import Pin as GPIO
+
 uDevice = UART(2, baudrate=9600, rx=16, tx=17, timeout=3000)
+uDevice = UART(2, baudrate=9600, rx=16, tx=17,rts=5, timeout=3000)
+uDevice = UART(2, baudrate=9600, rx=16, tx=17,rts=5,inverted =UART.RTS, timeout=3000)
+UART.RTS
+
+from machine import UART
+from machine import Pin as GPIO
+uDevice = UART(2, baudrate=9600, rx=16, tx=17,rts=5,inverted =UART.INV_RX, timeout=3000)
+uDevice = UART(2, baudrate=9600, rx=16, tx=17,rts=5, timeout=3000)
+buff = bytearray([0x01,0x03,0x20,0x00,0x00,0x04,0x4f,0xc9])
+
+
+uDevice = UART(2, baudrate=9600, rx=16, tx=17, timeout=3000)
+uDevice = UART(2, baudrate=9600, rx=16, tx=17,rts=5, timeout=3000)
+//uDevice = UART(2, baudrate=9600, rx=16, tx=17,cts=5, timeout=3000)
+
+uDevice = UART(2, baudrate=9600, rx=16, tx=17,rts=5,inverted =UART.INV_RTS, timeout=3000)
+
 en485pin = GPIO(5,GPIO.OUT)
 buff = bytearray([0x01,0x03,0x20,0x01,0x00,0x01,0x0a,0xde])
 buff = bytearray([0x01,0x03,0x20,0x01,0x00,0x01,0xde,0x0a])
@@ -19,6 +38,7 @@ uDevice.any()
 
 en485pin.value(0)
 uDevice.write(buff)
+uDevice.read(1)
 en485pin.value(1)
 uDevice.any()
 uDevice.read(uDevice.any())

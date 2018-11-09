@@ -1,10 +1,31 @@
 Project description
 
 
+sudo i2cdump -y 0 0x6f
+sudo i2cset -y 0 0x29 0x54 0x01
+
+sudo i2cget -y 0 0x6f 0x00
+
+
+
+
+esptool.py --chip esp32 --port COM10 erase_flash
+
+cd ~/esp/MicroPython_ESP32_psRAM_LoBo/MicroPython_BUILD
+
+
+
+esptool.py --chip esp32 --port COM10 write_flash -z 0x1000 binp.bin
+
+
 cd ~/esp/mpgsmcv/mpgsm/
+
+
 ampy --port COM10 put wavecom.py
+ampy --port COM10 put mpgsm.py
 
 
+ampy --port COM10 get main.py
 
 После прерывания, запустить можно
 mpgsm.device.MainWavecom()
@@ -15,6 +36,8 @@ mpgsm.device.en485pin.value(1)
 mpgsm.device.GetDevData(1)
 mpgsm.device.en485pin.value(0)
 
+mpgsm.device.uDevice.read(1)
+
 команда от сервера
 {"cmd":"SETDATA","ID":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}
 
@@ -24,3 +47,13 @@ self.uDevice = UART(2, baudrate=9600, rx=16, tx=17, timeout=3000)
 
 Модем WAVECOM
 Подключение через self.uGSM = UART(1, baudrate=115200, rx=22, tx=23, timeout=3000)
+
+Запросс всех регистров
+01h, 03h, 20h, 00h, 00h, 0Ch, 4Eh, 0Fh
+Ответ
+0       1       2       3   4    5 6        7 8     9 10        11 12       13 14       15 16
+01h,    03h,    18h,    13h,88h, 09h,C4h,   13h,88h, 07h,D0h,   25h,1Ch,    00h,00h,    00h,00h, 05h,DCh, 07h,C6h, 00h,00h, 00h,00h, 00h,00h, DFh,92h
+
+Вопроссы
+
+Данные должны быть в реальном времени?
