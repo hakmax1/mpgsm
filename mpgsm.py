@@ -428,21 +428,21 @@ class Device:
 
             data_device = {}
             data_device["devID"] = buff[0]
-            data_u_in = struct.unpack('H', buff[3:5])
-            data_u_out = struct.unpack('H', buff[5:7])
-            data_i_in = struct.unpack('H', buff[7:9])
-            data_i_out = struct.unpack('H', buff[9:11])
-            data_kpd = struct.unpack('H', buff[11:13])
-            data_temper = struct.unpack('H', buff[13:15])
-            data_reg_state = struct.unpack('H', buff[15:17])
+            data_u_in = struct.unpack('>H', buff[3:5])
+            data_u_out = struct.unpack('>H', buff[5:7])
+            data_i_in = struct.unpack('>H', buff[7:9])
+            data_i_out = struct.unpack('>H', buff[9:11])
+            data_kpd = struct.unpack('>H', buff[11:13])
+            data_temper = struct.unpack('>H', buff[13:15])
+            data_reg_state = struct.unpack('>H', buff[15:17])
 
-            data_u_ust_local = struct.unpack('H', buff[17:19])
-            data_i_ust_local = struct.unpack('H', buff[19:21])
+            data_u_ust_local = struct.unpack('>H', buff[17:19])
+            data_i_ust_local = struct.unpack('>H', buff[19:21])
 
-            data_u_ust_dist = struct.unpack('H', buff[21:23])
-            data_i_ust_dist = struct.unpack('H', buff[23:25])
+            data_u_ust_dist = struct.unpack('>H', buff[21:23])
+            data_i_ust_dist = struct.unpack('>H', buff[23:25])
 
-            data_reg_upr = struct.unpack('H', buff[25:27])
+            data_reg_upr = struct.unpack('>H', buff[25:27])
 
 
 
