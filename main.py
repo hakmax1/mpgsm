@@ -7,7 +7,7 @@ time.sleep(2)
 
 import machine
 import mpgsm
-"""
+
 
 
 i=0
@@ -21,6 +21,5 @@ except KeyboardInterrupt as e:
 except Exception:
     print("main.py except Exception")
     machine.reset()
-"""
 
 
