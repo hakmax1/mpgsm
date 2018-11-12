@@ -109,17 +109,17 @@ class ModBus:
         data_out.extend(MODBUS_FUNC_WRITE_REG)
         data_out.extend(addr>>8)
         data_out.extend(addr)
-
+    #                                                                                                               fixed
     def _add_crc_to_bytearray_(self, buff):
         crc = self.calc_crc(buff)
-        print("crc")
-        print(crc)
+        #print("crc")
+        #print(crc)
         #data_out = bytearray()
         #data_out.extend(buff)
         #print(data_out)
         buff.extend(crc.to_bytes(2,'big'))
         #data_out.extend(crc >> 8)
-        print(buff)
+        #print(buff)
         return buff
 
     def calc_crc(self,buff):
@@ -408,16 +408,14 @@ class Device:
         self._send_req_(data_out)
 
         data = self._read_ans_()
-        print("data = ", data)
-        print("len(data) = ", len(data))
+        #print("data = ", data)
+        #print("len(data) = ", len(data))
         if(len(data)>25):
-            self._alldata_modbus_to_strct_(data)
+            ret = self._alldata_modbus_to_strct_(data)
         if (len(data) == 0):
-            data = '{Errore}'
-        else:
-            data = "{Ok}"
+            ret = '{Errore}'
         #data = data_out
-        return data
+        return ret
 
     """
         анализируем входной буффер                                  fixed                    
@@ -464,7 +462,7 @@ class Device:
             data_to_server = {}
             data_to_server["msg"] = data_device
             data_to_server["timestamp"] = "10:10:10"
-            print(data_to_server)
+            #print(data_to_server)
 
             return data_to_server
         except NameError as e:
@@ -495,8 +493,8 @@ class Device:
                 #bt = ~bt
                 if(len(read_buff)==0):
                     if(bt!=0):
-                        print("type(bt) = ",type(bt))
-                        print("bt = ", bt)
+                        #print("type(bt) = ",type(bt))
+                        #print("bt = ", bt)
                         read_buff.append(bt)
                         num_byte += 1
                 else:
@@ -515,7 +513,8 @@ class Device:
     def _send_req_(self, req):
         # Включаем передатчик
         self.en485pin.value(1)
-        print(self.uDevice.write(req))
+        self.uDevice.write(req)
+        #print(self.uDevice.write(req))
         #print(self.uDevice.any())
         time.sleep(0.01)
         #self.uDevice.flush()
