@@ -397,14 +397,16 @@ class Device:
     def GetDevData(self, dev):
         # Получить данные ус-ва
         #buff = bytearray([0x01, 0x03, 0x20, 0x00, 0x00, 0x04, 0x4f, 0xc9])
+        self.uDevice.flush()
         data_out = bytearray()
         data_out.extend(struct.pack('b', dev))
         data_out.extend(b'\x03\x20\x00\x00\x0C')
         self.modbus._add_crc_to_bytearray_(data_out)
         #ModBus._add_crc_to_bytearray_(data_out)
         #data_out.extend(b'\x')
-        print("write data",data_out)
+        #print("write data",data_out)
         self._send_req_(data_out)
+
         data = self._read_ans_()
         print("data = ", data)
         print("len(data) = ", len(data))
@@ -418,13 +420,13 @@ class Device:
         return data
 
     """
-        анализируем входной буффер
+        анализируем входной буффер                                  fixed                    
     """
     def _alldata_modbus_to_strct_(self,buff):
         try:
             # buff = bytearray([6, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5 ,5 ,5,6,7,7])
-            print("_alldata_modbus_to_strct_ buff len", len(buff))
-            print("_alldata_modbus_to_strct_ buff",buff[3],buff[4],buff[5],buff[6],buff[7],buff[8])
+            #print("_alldata_modbus_to_strct_ buff len", len(buff))
+            #print("_alldata_modbus_to_strct_ buff",buff[3],buff[4],buff[5],buff[6],buff[7],buff[8])
 
             data_device = {}
             data_device["devID"] = buff[0]
@@ -479,6 +481,11 @@ class Device:
         is_data_read = False
         num_byte = 0
         read_buff = bytearray()
+        time.sleep(0.3)
+        self.en485pin.value(1)
+        time.sleep(0.01)
+        self.en485pin.value(0)
+        time.sleep(0.01)
 
         while (is_data_read != True):
             bts = self.uDevice.read(1)
@@ -509,7 +516,7 @@ class Device:
         # Включаем передатчик
         self.en485pin.value(1)
         print(self.uDevice.write(req))
-        print(self.uDevice.any())
+        #print(self.uDevice.any())
         time.sleep(0.01)
         #self.uDevice.flush()
         self.en485pin.value(0)
