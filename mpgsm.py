@@ -392,7 +392,7 @@ class Device:
         self.uDevice.deinit()
 
     """
-        Получить все данные от усв-ва
+        Получить все данные от усв-ва                                                                               fixed
     """
     def GetDevData(self, dev):
         # Получить данные ус-ва
@@ -417,14 +417,23 @@ class Device:
         #data = data_out
         return ret
 
+
+    def GetAllData(self):
+        for dev in self.dict_devices:
+            ans = self.GetDevData(dev)
+            self._send_data_to_server_(ans)
+            # self.serversock.send(ans)
+
+
+
     """
-        анализируем входной буффер                                  fixed                    
+            анализируем входной буффер                                                                                  fixed                    
     """
-    def _alldata_modbus_to_strct_(self,buff):
+    def _alldata_modbus_to_strct_(self, buff):
         try:
             # buff = bytearray([6, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5 ,5 ,5,6,7,7])
-            #print("_alldata_modbus_to_strct_ buff len", len(buff))
-            #print("_alldata_modbus_to_strct_ buff",buff[3],buff[4],buff[5],buff[6],buff[7],buff[8])
+            # print("_alldata_modbus_to_strct_ buff len", len(buff))
+            # print("_alldata_modbus_to_strct_ buff",buff[3],buff[4],buff[5],buff[6],buff[7],buff[8])
 
             data_device = {}
             data_device["devID"] = buff[0]
@@ -444,8 +453,6 @@ class Device:
 
             data_reg_upr = struct.unpack('>H', buff[25:27])
 
-
-
             data_device["Uinput"] = data_u_in
             data_device["Uoutput"] = data_u_out
             data_device["Iinput"] = data_i_in
@@ -462,19 +469,13 @@ class Device:
             data_to_server = {}
             data_to_server["msg"] = data_device
             data_to_server["timestamp"] = "10:10:10"
-            #print(data_to_server)
+            # print(data_to_server)
 
             return data_to_server
         except NameError as e:
             print(e)
         pass
-
-    def GetAllData(self):
-        for dev in self.dict_devices:
-            ans = self.GetDevData(dev)
-            self._send_data_to_server_(ans)
-            # self.serversock.send(ans)
-
+    #                                                                                                               fixed
     def _read_ans_(self):
         is_data_read = False
         num_byte = 0
@@ -509,7 +510,7 @@ class Device:
                 self.uDevice.flush()
                 return read_buff
         return read_buff
-
+    #                                                                                                               fixed
     def _send_req_(self, req):
         # Включаем передатчик
         self.en485pin.value(1)
