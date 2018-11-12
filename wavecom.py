@@ -35,6 +35,7 @@
 import time
 import _thread
 from machine import UART
+import ujson
 
 #cmd_AT = {'cmd':"AT\r\n",'cmd_resp':'OK','time_out':1,'delay':0,'skip':0}
 
@@ -64,7 +65,7 @@ class wavecom:
         self.cmd_START_GPRS_BR = {'cmd': 'AT+WIPBR=4,6,0\r\n', 'cmd_resp': 'OK', 'time_out': 6000, 'delay': 0, 'skip': 0}
         self.cmd_STOP_GPRS_BR = {'cmd': 'AT+WIPBR=5,6\r\n', 'cmd_resp': 'OKK', 'time_out': 6000, 'delay': 0, 'skip': 0}
         self.cmd_CLOSE_GPRS_BR = {'cmd': 'AT+WIPBR=0,6\r\n', 'cmd_resp': 'OKK', 'time_out': 6000, 'delay': 0, 'skip': 0}
-        self.cmd_CREATE_TCP_CLIENT = {'cmd': 'AT+WIPCREATE=2,1,"185.41.186.74",2020\r\n', 'cmd_resp': 'OK', 'time_out': 6000,
+        self.cmd_CREATE_TCP_CLIENT = {'cmd': 'AT+WIPCREATE=2,1,"185.41.186.74",2021\r\n', 'cmd_resp': 'OK', 'time_out': 6000,
                                  'delay': 0, 'skip': 0}
         self.cmd_READ_DATA = {'cmd': 'AT+WIPDATA=2,1,1\r\n', 'cmd_resp': 'CONNECT', 'time_out': 6000, 'delay': 0, 'skip': 0}
 
@@ -116,7 +117,11 @@ class wavecom:
 
 
     def send_data_to_server(self,data):
-        self.uGSM.write(data)
+        data = ujson.dumps(data)
+        if (type(data) == str):
+            self.uGSM.write(data.encode())
+        else:
+            self.uGSM.write(data)
 
     def uart_cb_func(self,res):
         # Ф-ция обратного вызова при приеме данных через UART
@@ -215,7 +220,7 @@ class wavecom:
         read_str = self.uGSM.readln(at_cmd['time_out'])
         while(read_str!= None):
             read_str = read_str.split()
-            print(read_str)
+            #print(read_str)
             if(len(read_str)>0):
                 if(read_str[0] == at_cmd['cmd_resp']):
                     self._f_resp_ok = True
