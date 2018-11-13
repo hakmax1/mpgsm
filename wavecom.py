@@ -106,9 +106,9 @@ class wavecom:
             print("device not work")
     # Отключаем режим GPRS, режим AT команд
     def disconnect_gprs(self):
-        time.sleep(1)
+        time.sleep(2)
         self.send_at_req(self.cmd_STOP_READ_DATA)
-        time.sleep(1)
+        time.sleep(2)
         self.send_at_req(self.cmd_AT)
         self.send_at_req(self.cmd_STOP_GPRS_BR)
         self.send_at_req(self.cmd_CLOSE_GPRS_BR)
@@ -117,8 +117,11 @@ class wavecom:
 
 
     def send_data_to_server(self,data):
+        self.uGSM.flush()
         data = ujson.dumps(data)
+        print("send_data_to_server data = ",data)
         if (type(data) == str):
+            data = data+"\n"
             self.uGSM.write(data.encode())
         else:
             self.uGSM.write(data)
@@ -141,8 +144,6 @@ class wavecom:
                 if(res[2]==self._responce):
                     self._f_resp_ok = True
                 #else:
-
-
                 pass
         pass
 
@@ -201,7 +202,6 @@ class wavecom:
                 # если не найдена строка '+CMGL: ', скорее всего это текст сообщения
                 stroka = self._get_str_from_line(self.uGSM.readln(1000))
                 pass
-
 
     def proc_server_data(self):
         # чтение данных, задержка на чтение в течении 2 сек
