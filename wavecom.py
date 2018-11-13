@@ -44,9 +44,9 @@ class wavecom:
 
         print("init WaveCom Device")
         self._responce = ''
-        self._f_read_data_from_server = False    # Флаг чтения данных с сервера
-        self._f_resp_ok = False                 # Флаг успешного запросса
-        self._f_device_ok = False               # Флаг успешного подключения к модему
+        self._f_read_data_from_server = False           # Флаг чтения данных с сервера
+        self._f_resp_ok = False                         # Флаг успешного запросса
+        self._f_device_ok = False                       # Флаг успешного подключения к модему
 
         self._f_err_no_connect_gprs = False
         self._f_err_no_connect_module = False
@@ -103,6 +103,7 @@ class wavecom:
             self._f_read_data_from_server = True
             return True
         else:
+            # 
             print("device not work")
     # Отключаем режим GPRS, режим AT команд
     def disconnect_gprs(self):
@@ -224,6 +225,7 @@ class wavecom:
             if(len(read_str)>0):
                 if(read_str[0] == at_cmd['cmd_resp']):
                     self._f_resp_ok = True
+                    self.uGSM.flush()
                     break
             read_str = self.uGSM.readln(at_cmd['time_out'])
         return self._f_resp_ok
