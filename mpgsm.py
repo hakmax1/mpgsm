@@ -556,10 +556,12 @@ class Device:
             if (in_data.get("cmd").find("GETDATA") == 0):
                 # пришла команда опроса одного ус-ва
                 print("GETDATA")
+                timestamp = in_data.get("timestamp")
                 #data_dev_id = int(in_data.get("cmd")[len("GETDATA"):])
                 data_dev_id = int(in_data.get("id"))
                 print("data_dev_id = ", data_dev_id)
                 data = self.GetDevData(data_dev_id)
+                data["timestamp"] = timestamp
                 data_device = {}
                 data_device["cmd"] = "DATA"
                 data_device["ID"] = data_dev_id
