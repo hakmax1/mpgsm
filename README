@@ -14,6 +14,10 @@ esptool.py --chip esp32 --port COM10 erase_flash
 cd ~/esp/MicroPython_ESP32_psRAM_LoBo/MicroPython_BUILD
 
 
+To change some ESP32 & Micropython options or to create initial sdkconfig run:
+    ./BUILD.sh menuconfig
+CONFIG_ESP32_PANIC_PRINT_REBOOT=y
+
 
 esptool.py --chip esp32 --port COM10 write_flash -z 0x1000 binp.bin
 
@@ -50,6 +54,21 @@ mpgsm.device._analis_server_socket_buff_(stroka)
 
 
 http://185.41.186.74:1880/data
+
+buff = '{"cmd":"SETDATA","ID":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}'
+mpgsm.device._analis_server_socket_buff_(buff)
+
+01062009000f120c
+data=bytearray(b'\x01\x06 \t\x00\x0f\x12\x0c')
+
+mpgsm.device.en485pin.value(1)
+mpgsm.device.uDevice.write(data)
+mpgsm.device.en485pin.value(0)
+
+
+
+
+cmd_dict ={"cmd":"SETDATA","ID":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}
 
 
 
