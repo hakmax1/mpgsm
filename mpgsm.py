@@ -218,17 +218,20 @@ class Device:
         #self.serversock.settimeout(0.5)
         #self.serversock.connect(('185.41.186.74', 2020))
 
-    """
-        Подключаемся через GSM
-    """
+
     def ConnectToGSM(self):
+        """
+        Connect via GSM to server socket
+        :return: none
+        """
         gsm.connect()
         self.serversock.settimeout(0.5)
         self.serversock.connect(('185.41.186.74', 2021))
-    """
-            Отключение от GSM
-    """
     def DisconnectGSM(self):
+        """
+        Disconnect from server
+        :return: None
+        """
         pass
     """
         callback - ф-ция приема сообщений
@@ -395,6 +398,9 @@ class Device:
         Получить все данные от усв-ва                                                                               fixed
     """
     def GetDevData(self, dev):
+        """
+        return dict or '{Error}'
+        """
         # Получить данные ус-ва
         #buff = bytearray([0x01, 0x03, 0x20, 0x00, 0x00, 0x04, 0x4f, 0xc9])
         self.uDevice.flush()
@@ -413,9 +419,68 @@ class Device:
         if(len(data)>25):
             ret = self._alldata_modbus_to_strct_(data)
         if (len(data) == 0):
-            ret = '{Errore}'
+            ret = '{Error}'
         #data = data_out
         return ret
+
+    def SetDevData(self,cmd_dict):
+        """
+        From server comes a command like {"cmd":"SETDATA","ID":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"18:22:26"}
+
+        :param cmd_dict:    dict param
+        :return:
+        """
+        print("cmd_dict = ",cmd_dict)
+        print("type cmd_dict = ", type(cmd_dict))
+        self.uDevice.flush()
+
+
+        #if(cmd_dict.get("cmd")==None):
+        #    return "Error"
+
+        Iust=cmd_dict.get("msg").get("Iust")
+        Uust = cmd_dict.get("msg").get("Uust")
+        #float(str(data_dev_iust)[1:-1])
+        print("Iust SetDevData")
+        print(cmd_dict.get("msg").get("Iust"))
+        print("Uust SetDevData")
+        print(cmd_dict.get("msg").get("Uust"))
+        if (Iust != None):
+            #print("Iust = ",Iust)
+            Iust = float(str(Iust)[1:-1])
+            Iust = Iust*100
+            Iust = int(Iust)
+            #print("Iusti = ", Iust)
+            data_out = bytearray()
+            data_out.extend(struct.pack('b', cmd_dict.get("ID")))
+            data_out.extend(b'\x06')
+            data_out.extend(b'\x20\x09')
+            data_out.extend(struct.pack('>H', Iust))
+            self.modbus._add_crc_to_bytearray_(data_out)
+            self._send_req_(data_out)
+            data = self._read_ans_()
+            print("data _read_ans_ = ", data)
+
+            #print("data_out",data_out)
+
+            #print("Iust type ", type(cmd_dict.get("Iust").get("Iust")))
+            pass
+        if (cmd_dict.get("msg").get("Uust") != None):
+            Uust = float(str(Uust)[1:-1])
+            Uust = Uust * 100
+            Uust = int(Uust)
+            # print("Iusti = ", Iust)
+            data_out = bytearray()
+            data_out.extend(struct.pack('b', cmd_dict.get("ID")))
+            data_out.extend(b'\x06')
+            data_out.extend(b'\x20\x0A')
+            data_out.extend(struct.pack('>H', Uust))
+            self.modbus._add_crc_to_bytearray_(data_out)
+            self._send_req_(data_out)
+            data = self._read_ans_()
+            print("data _read_ans_ = ", data)
+            pass
+        pass
 
 
     def GetAllData(self):
@@ -555,11 +620,11 @@ class Device:
 
             if (in_data.get("cmd").find("GETDATA") == 0):
                 # пришла команда опроса одного ус-ва
-                print("GETDATA")
+                print("cmd=GETDATA")
                 timestamp = in_data.get("timestamp")
                 #data_dev_id = int(in_data.get("cmd")[len("GETDATA"):])
                 data_dev_id = int(in_data.get("id"))
-                print("data_dev_id = ", data_dev_id)
+                #print("data_dev_id = ", data_dev_id)
                 data = self.GetDevData(data_dev_id)
                 data["timestamp"] = timestamp
                 data_device = {}
@@ -583,13 +648,15 @@ class Device:
                 data_dev_reg = in_data.get("msg").get("reg")
                 data_dev_iust = in_data.get("msg").get("Iust")
                 data_dev_uust = in_data.get("msg").get("Uust")
-                print("data_dev_reg = ", data_dev_reg)
-                print("Iust = ", data_dev_iust)
-                print("Uust = ", data_dev_uust)
-                print(type(data_dev_iust))
-                print(type(data_dev_uust))
-                print(str(data_dev_iust)[1:-1])
-                print(str(data_dev_uust)[1:-1])
+                #print("data_dev_reg = ", data_dev_reg)
+                #print("Iust = ", data_dev_iust)
+                #print("Uust = ", data_dev_uust)
+                #print(type(data_dev_iust))
+                #print(type(data_dev_uust))
+                #print(str(data_dev_iust)[1:-1])
+                #print(str(data_dev_uust)[1:-1])
+
+                self.SetDevData(in_data)
 
                 data_dev_iust = float(str(data_dev_iust)[1:-1])
                 data_dev_uust = float(str(data_dev_uust)[1:-1])
@@ -609,11 +676,11 @@ class Device:
                 print(data_out)
                 # self._send_req_(data_out)
                 # сформировали выходной буффер, можем отправлять
-                print("devID = ", data_dev_id)
-                print("reg = ", data_dev_reg)
-                print("Iust = ", data_dev_iust)
-                print("Uust = ", data_dev_uust)
-                print("data_out = ", data_out)
+                #print("devID = ", data_dev_id)
+                #print("reg = ", data_dev_reg)
+                #print("Iust = ", data_dev_iust)
+                #print("Uust = ", data_dev_uust)
+                #print("data_out = ", data_out)
 
         except OSError as e:
             print("!!!!!!!!!!!!!!!  except OSError in _analis_server_socket_buff_   !!!!!!!!")
@@ -621,10 +688,6 @@ class Device:
         except Exception as e:
             print("!!!!!!!!!!!!!!!  except Exception in _analis_server_socket_buff_   !!!!!!!!")
             print(e)
-        else:
-            #исключения не было
-            #print("!!!!!!!!!!!!!!!  except else in _analis_server_socket_buff_   !!!!!!!!")
-            pass
         finally:
             #print("!!!!!!!!!!!!!!!  except finally in _analis_server_socket_buff_   !!!!!!!!")
             pass
