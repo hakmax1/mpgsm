@@ -31,12 +31,28 @@ ampy --port COM10 get main.py
 mpgsm.device.MainWavecom()
 
 
+/*          For debug RS485                             */
 
 mpgsm.device.en485pin.value(1)
 mpgsm.device.GetDevData(1)
 mpgsm.device.en485pin.value(0)
 
 mpgsm.device.uDevice.read(1)
+
+mpgsm.device.en485pin.value(1)
+mpgsm.device.en485pin.value(0)
+mpgsm.device.uDevice.any()
+
+
+/*          For debug server data                       */
+stroka =  {"cmd":"GETDATA","id":1,"msg":{"devID":1},"timestamp":"13:1:18"}
+mpgsm.device._analis_server_socket_buff_(stroka)
+
+
+http://185.41.186.74:1880/data
+
+
+
 
 команда от сервера
 {"cmd":"SETDATA","ID":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}
@@ -57,3 +73,5 @@ self.uDevice = UART(2, baudrate=9600, rx=16, tx=17, timeout=3000)
 Вопроссы
 
 Данные должны быть в реальном времени?
+
+
