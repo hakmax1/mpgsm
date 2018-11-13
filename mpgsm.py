@@ -224,7 +224,7 @@ class Device:
     def ConnectToGSM(self):
         gsm.connect()
         self.serversock.settimeout(0.5)
-        self.serversock.connect(('185.41.186.74', 2020))
+        self.serversock.connect(('185.41.186.74', 2021))
     """
             Отключение от GSM
     """
@@ -457,14 +457,14 @@ class Device:
             data_device["Uoutput"] = data_u_out
             data_device["Iinput"] = data_i_in
             data_device["Ioutput"] = data_i_out
-            data_device["KPD"] = data_kpd
-            data_device["Temer"] = data_temper
-            data_device["RegState"] = data_reg_state
+            data_device["kpd"] = data_kpd
+            data_device["temp"] = data_temper
+            data_device["state"] = data_reg_state
             data_device["Udist"] = data_u_ust_local
             data_device["Idist"] = data_i_ust_local
             data_device["Ulocal"] = data_u_ust_dist
             data_device["Ilocal"] = data_i_ust_dist
-            data_device["RegUpr"] = data_reg_upr
+            data_device["regupr"] = data_reg_upr
 
             data_to_server = {}
             data_to_server["msg"] = data_device
@@ -551,21 +551,32 @@ class Device:
             if (in_data.get("cmd") == "GETALLDATA"):
                 # пришла команда опроса всех ус-в
                 print("GETALLDATA")
-                self.GetAllData()
+                #self.GetAllData()
 
             if (in_data.get("cmd").find("GETDATA") == 0):
                 # пришла команда опроса одного ус-ва
                 print("GETDATA")
-                data_dev_id = int(in_data.get("cmd")[len("GETDATA"):])
+                #data_dev_id = int(in_data.get("cmd")[len("GETDATA"):])
+                data_dev_id = int(in_data.get("id"))
                 print("data_dev_id = ", data_dev_id)
                 data = self.GetDevData(data_dev_id)
-                self._send_data_to_server_(data)
+                data_device = {}
+                data_device["cmd"] = "DATA"
+                data_device["ID"] = data_dev_id
+                data_device["msg"] = data
+
+
+                #print("self.GetDevData(data_dev_id) = ", data)
+                #print("type(data) = ", type(data))
+
+                self._send_data_to_server_(data_device)
                 # self.serversock.send(data)
 
             if (in_data.get("cmd").find("SETDATA") == 0):
                 # пришла команда опроса установки параметров
                 print("SETDATA")
-                data_dev_id = int(in_data.get("cmd")[len("SETDATA"):])
+                #data_dev_id = int(in_data.get("cmd")[len("SETDATA"):])
+                data_dev_id = int(in_data.get("ID"))
                 print("data_dev_id = ", data_dev_id)
                 data_dev_reg = in_data.get("msg").get("reg")
                 data_dev_iust = in_data.get("msg").get("Iust")
@@ -583,10 +594,15 @@ class Device:
 
                 data_out = bytearray()
 
-                data_out.extend(struct.pack('b', data_dev_id))
-                data_out.extend(struct.pack('b', data_dev_reg))
-                data_out.extend(struct.pack('f', data_dev_iust))
-                data_out.extend(struct.pack('f', data_dev_uust))
+                if(data_dev_id != None):
+                    data_out.extend(struct.pack('b', data_dev_id))
+                if (data_dev_reg != None):
+                    data_out.extend(struct.pack('b', data_dev_reg))
+                if (data_dev_iust != None):
+                    data_out.extend(struct.pack('f', data_dev_iust))
+                if (data_dev_uust != None):
+                    data_out.extend(struct.pack('f', data_dev_uust))
+
                 data_out.extend(b'\xaa')
                 print(data_out)
                 # self._send_req_(data_out)
@@ -605,9 +621,11 @@ class Device:
             print(e)
         else:
             #исключения не было
-            print("!!!!!!!!!!!!!!!  except else in _analis_server_socket_buff_   !!!!!!!!")
+            #print("!!!!!!!!!!!!!!!  except else in _analis_server_socket_buff_   !!!!!!!!")
+            pass
         finally:
-            print("!!!!!!!!!!!!!!!  except finally in _analis_server_socket_buff_   !!!!!!!!")
+            #print("!!!!!!!!!!!!!!!  except finally in _analis_server_socket_buff_   !!!!!!!!")
+            pass
         # Анализируем входной буффер сервер соккета
         pass
 
