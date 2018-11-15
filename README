@@ -9,7 +9,36 @@ sudo i2cget -y 0 0x6f 0x00
 
 
 
+
+esptool.py --port COM10 flash_id
+
+$ esptool.py --port COM10 flash_id
+esptool.py v2.5.0
+Serial port COM10
+Connecting........__
+Detecting chip type... ESP32
+Chip is ESP32D0WDQ6 (revision 0)
+Features: WiFi, BT, Dual Core
+MAC: 24:0a:c4:81:76:7c
+Uploading stub...
+Running stub...
+Stub running...
+Manufacturer: c8
+Device: 4016
+Detected flash size: 4MB
+Hard resetting via RTS pin...
+
 esptool.py --chip esp32 --port COM10 erase_flash
+
+esptool.py --port COM10 write_flash -fm qio 0x00000 boot_v1.2+.bin 0x01000 user1.1024.new.2.bin 0xfc000 esp_init_data_default.bin 0x7e000 blank.bin
+
+esptool.py --chip esp32 --port ${FLASH_COMPORT} --baud ${FLASH_BDRATE} --before default_reset --after no_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 bootloader/bootloader.bin 0xf000 phy_init_data.bin 0x10000 MicroPython.bin 0x8000 partitions_mpy.bin 
+
+esptool.py --chip esp32 --port COM10 --before default_reset --after no_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 bootloader.bin 0xf000 phy_init_data.bin 0x10000 MicroPython.bin 0x8000 partitions_mpy.bin 
+
+
+
+
 
 cd ~/esp/MicroPython_ESP32_psRAM_LoBo/MicroPython_BUILD
 
