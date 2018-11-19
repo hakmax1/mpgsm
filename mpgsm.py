@@ -224,9 +224,10 @@ class Device:
         Connect via GSM to server socket
         :return: none
         """
-        gsm.connect()
-        self.serversock.settimeout(0.5)
-        self.serversock.connect(('185.41.186.74', 2021))
+        #self.gsm.connect()
+        #self.serversock.settimeout(0.5)
+        #self.serversock.connect(('185.41.186.74', 2020))
+        #self.serversock.connect(('google.ru', 80))
     def DisconnectGSM(self):
         """
         Disconnect from server
@@ -410,16 +411,17 @@ class Device:
         self.modbus._add_crc_to_bytearray_(data_out)
         #ModBus._add_crc_to_bytearray_(data_out)
         #data_out.extend(b'\x')
-        #print("write data",data_out)
+        print("write data",data_out)
         self._send_req_(data_out)
 
         data = self._read_ans_()
-        #print("data = ", data)
+        print("data = ", data)
         #print("len(data) = ", len(data))
         if(len(data)>25):
             ret = self._alldata_modbus_to_strct_(data)
         if (len(data) == 0):
-            ret = '{Error}'
+            ret= {}
+            ret["msg"]="Error"
         #data = data_out
         return ret
 
@@ -502,21 +504,28 @@ class Device:
 
             data_device = {}
             data_device["devID"] = buff[0]
-            data_u_in = struct.unpack('>H', buff[3:5])
-            data_u_out = struct.unpack('>H', buff[5:7])
-            data_i_in = struct.unpack('>H', buff[7:9])
-            data_i_out = struct.unpack('>H', buff[9:11])
-            data_kpd = struct.unpack('>H', buff[11:13])
-            data_temper = struct.unpack('>H', buff[13:15])
-            data_reg_state = struct.unpack('>H', buff[15:17])
-
-            data_u_ust_local = struct.unpack('>H', buff[17:19])
-            data_i_ust_local = struct.unpack('>H', buff[19:21])
-
-            data_u_ust_dist = struct.unpack('>H', buff[21:23])
-            data_i_ust_dist = struct.unpack('>H', buff[23:25])
-
-            data_reg_upr = struct.unpack('>H', buff[25:27])
+            data_u_in = struct.unpack('>H', buff[3:5])[0]
+            data_u_in = data_u_in /100
+            data_u_out = struct.unpack('>H', buff[5:7])[0]
+            data_u_out = data_u_out /100
+            data_i_in = struct.unpack('>H', buff[7:9])[0]
+            data_i_in = data_i_in/100
+            data_i_out = struct.unpack('>H', buff[9:11])[0]
+            data_i_out = data_i_out / 100
+            data_kpd = struct.unpack('>H', buff[11:13])[0]
+            data_kpd = data_kpd / 100
+            data_temper = struct.unpack('>H', buff[13:15])[0]
+            data_temper = data_temper / 100
+            data_reg_state = struct.unpack('>H', buff[15:17])[0]
+            data_u_ust_local = struct.unpack('>H', buff[17:19])[0]
+            data_u_ust_local = data_u_ust_local / 100
+            data_i_ust_local = struct.unpack('>H', buff[19:21])[0]
+            data_i_ust_local = data_i_ust_local / 100
+            data_u_ust_dist = struct.unpack('>H', buff[21:23])[0]
+            data_u_ust_dist = data_u_ust_dist / 100
+            data_i_ust_dist = struct.unpack('>H', buff[23:25])[0]
+            data_i_ust_dist = data_i_ust_dist / 100
+            data_reg_upr = struct.unpack('>H', buff[25:27])[0]
 
             data_device["Uinput"] = data_u_in
             data_device["Uoutput"] = data_u_out
@@ -534,7 +543,7 @@ class Device:
             data_to_server = {}
             data_to_server["msg"] = data_device
             data_to_server["timestamp"] = "10:10:10"
-            # print(data_to_server)
+            print(data_to_server)
 
             return data_to_server
         except NameError as e:
@@ -595,6 +604,8 @@ class Device:
     # На всякий случай прорверяем в каком виде данные строка или буфер
     def _analis_server_socket_buff_(self, buff):
         try:
+            print("_analis_server_socket_buff_              start")
+            print("_analis_server_socket_buff_              buff = ",buff)
             if (type(buff) != str):
                 stroka = ''
                 for b in buff:
@@ -616,6 +627,30 @@ class Device:
             if (in_data.get("cmd") == "GETALLDATA"):
                 # пришла команда опроса всех ус-в
                 print("GETALLDATA")
+
+                for dev in self.dict_devices:
+                    data = self.GetDevData(dev)
+                    print("data = ", data)
+                    print("type data = ", type(data))
+                    timestamp = in_data.get("timestamp")
+                    # data_dev_id = int(in_data.get("cmd")[len("GETDATA"):])
+                    #data_dev_id = int(in_data.get("id"))
+                    # print("data_dev_id = ", data_dev_id)
+                    #data = self.GetDevData(data_dev_id)
+                    data["timestamp"] = timestamp
+                    data_device = {}
+                    data_device["ID"] = dev
+                    data_device["msg"] = data["msg"]
+                    data_device["cmd"] = "DATA"
+
+                    print("self.GetDevData(data_dev_id) = ", data)
+                    # print("type(data) = ", type(data))
+
+                    self._send_data_to_server_(data_device)
+
+
+
+
                 #self.GetAllData()
 
             if (in_data.get("cmd").find("GETDATA") == 0):
@@ -628,12 +663,12 @@ class Device:
                 data = self.GetDevData(data_dev_id)
                 data["timestamp"] = timestamp
                 data_device = {}
-                data_device["cmd"] = "DATA"
                 data_device["ID"] = data_dev_id
-                data_device["msg"] = data
+                data_device["msg"] = data["msg"]
+                data_device["cmd"] = "DATA"
 
 
-                #print("self.GetDevData(data_dev_id) = ", data)
+                print("self.GetDevData(data_dev_id) = ", data)
                 #print("type(data) = ", type(data))
 
                 self._send_data_to_server_(data_device)
