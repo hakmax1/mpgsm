@@ -77,14 +77,17 @@ mpgsm.device.en485pin.value(0)
 mpgsm.device.uDevice.any()
 
 
-/*          For debug server data                       */
-stroka =  {"cmd":"GETDATA","id":1,"msg":{"devID":1},"timestamp":"13:1:18"}
-mpgsm.device._analis_server_socket_buff_(stroka)
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-          For debug server data        -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 
 
 http://185.41.186.74:1880/data
 
 buff = '{"cmd":"SETDATA","ID":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}'
+buff = '{"cmd":"GETDATA","id":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}'
+mpgsm.device._analis_server_socket_buff_(buff)
+
+/*          ---------------------       debug command "GETALLDATA"      ----------------------         */
+buff = '{"cmd":"GETALLDATA","id":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}'
 mpgsm.device._analis_server_socket_buff_(buff)
 
 01062009000f120c
@@ -94,6 +97,8 @@ mpgsm.device.en485pin.value(1)
 mpgsm.device.uDevice.write(data)
 mpgsm.device.en485pin.value(0)
 
+
+mpgsm.device.gsm.send_at_req(mpgsm.device.gsm.cmd_AT)
 
 
 
