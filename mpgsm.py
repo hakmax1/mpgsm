@@ -329,6 +329,11 @@ class Device:
                     # соеденились с gprs
                     self.indStateGPRSPin.value(1)
                     self.indStateModemPin.value(1)
+                    data_server = {}
+                    data_server["ID"] = 1
+                    data_server["cmd"] = "READY"
+
+                    self._send_data_to_server_(data_server)
                     gprs_t_count = 0
                     while (gprs_t_count < 20):
                         gprs_t_count = gprs_t_count + 1
@@ -400,18 +405,27 @@ class Device:
     """
     def GetDevData(self, dev):
         """
-        return dict or '{Error}'
+        Get all data from device
+        :param dev: id(num) device
+        :return: register value from device as type 'dict', or ['msg':'Error'] if not read data
         """
-        # Получить данные ус-ва
-        #buff = bytearray([0x01, 0x03, 0x20, 0x00, 0x00, 0x04, 0x4f, 0xc9])
         self.uDevice.flush()
+        finddev=False
+        for devid in self.dict_devices:
+            if(devid == dev):
+                finddev = True
+        if(finddev!=True):
+            ret = {}
+            ret["msg"] = "Error"
+            return ret
+
         data_out = bytearray()
         data_out.extend(struct.pack('b', dev))
         data_out.extend(b'\x03\x20\x00\x00\x0C')
         self.modbus._add_crc_to_bytearray_(data_out)
         #ModBus._add_crc_to_bytearray_(data_out)
         #data_out.extend(b'\x')
-        print("write data",data_out)
+        #print("write data",data_out)
         self._send_req_(data_out)
 
         data = self._read_ans_()
@@ -425,12 +439,17 @@ class Device:
         #data = data_out
         return ret
 
+    def SetCtrlData(self, cmd_dict):
+
+        
+        pass
+
     def SetDevData(self,cmd_dict):
         """
         From server comes a command like {"cmd":"SETDATA","ID":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"18:22:26"}
 
         :param cmd_dict:    dict param
-        :return:
+        :return: register value from device as type 'dict', or
         """
         print("cmd_dict = ",cmd_dict)
         print("type cmd_dict = ", type(cmd_dict))
@@ -484,7 +503,6 @@ class Device:
             pass
         pass
 
-
     def GetAllData(self):
         for dev in self.dict_devices:
             ans = self.GetDevData(dev)
@@ -492,11 +510,13 @@ class Device:
             # self.serversock.send(ans)
 
 
-
-    """
-            анализируем входной буффер                                                                                  fixed                    
-    """
     def _alldata_modbus_to_strct_(self, buff):
+        """
+        Analis buffer from device, on request get all registers
+        :param buff:    input buffer
+        :return:
+                data from device in type 'dict'
+        """
         try:
             # buff = bytearray([6, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5 ,5 ,5,6,7,7])
             # print("_alldata_modbus_to_strct_ buff len", len(buff))
@@ -549,7 +569,7 @@ class Device:
         except NameError as e:
             print(e)
         pass
-    #                                                                                                               fixed
+
     def _read_ans_(self):
         is_data_read = False
         num_byte = 0
@@ -626,6 +646,7 @@ class Device:
             # Смотрим какая команда пришла
             if (in_data.get("cmd") == "GETALLDATA"):
                 # пришла команда опроса всех ус-в
+                # Survey all devices from the list self.dict_devices
                 print("GETALLDATA")
 
                 for dev in self.dict_devices:
@@ -637,35 +658,30 @@ class Device:
                     #data_dev_id = int(in_data.get("id"))
                     # print("data_dev_id = ", data_dev_id)
                     #data = self.GetDevData(data_dev_id)
-                    data["timestamp"] = timestamp
                     data_device = {}
                     data_device["ID"] = dev
                     data_device["msg"] = data["msg"]
                     data_device["cmd"] = "DATA"
-
-                    print("self.GetDevData(data_dev_id) = ", data)
+                    data_device["timestamp"] = timestamp
+                    #print("self.GetDevData(data_dev_id) = ", data)
                     # print("type(data) = ", type(data))
-
                     self._send_data_to_server_(data_device)
-
-
-
-
-                #self.GetAllData()
 
             if (in_data.get("cmd").find("GETDATA") == 0):
                 # пришла команда опроса одного ус-ва
+                # Survey device num "id" from the list self.dict_devices
                 print("cmd=GETDATA")
                 timestamp = in_data.get("timestamp")
                 #data_dev_id = int(in_data.get("cmd")[len("GETDATA"):])
                 data_dev_id = int(in_data.get("id"))
                 #print("data_dev_id = ", data_dev_id)
                 data = self.GetDevData(data_dev_id)
-                data["timestamp"] = timestamp
                 data_device = {}
                 data_device["ID"] = data_dev_id
                 data_device["msg"] = data["msg"]
                 data_device["cmd"] = "DATA"
+                data_device["timestamp"] = timestamp
+
 
 
                 print("self.GetDevData(data_dev_id) = ", data)
@@ -673,6 +689,14 @@ class Device:
 
                 self._send_data_to_server_(data_device)
                 # self.serversock.send(data)
+
+            if (in_data.get("cmd").find("SETCTRL") == 0):
+                #print("SETCTRL to dev")
+                data_dev_id = int(in_data.get("msg").get("devID"))
+                print("SETCTRL to dev - ",data_dev_id)
+                self.SetCtrlData(in_data)
+
+                pass
 
             if (in_data.get("cmd").find("SETDATA") == 0):
                 # пришла команда опроса установки параметров
