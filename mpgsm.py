@@ -165,8 +165,9 @@ class ModBus:
 class Device:
     def __init__(self):
         print("init uDevice")
+        self.ID = "1"
         # Номера ус-в
-        self.dict_devices = (1, 2, 3, 4, 5)
+        self.dict_devices = (1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30)
         #self.registrPhoneNumbers = "+380665168235"
         self.registrPhoneNumbers = ["+380688810836","+380665168235"]
         self.gsmAPN = 'internet'
@@ -330,9 +331,8 @@ class Device:
                     self.indStateGPRSPin.value(1)
                     self.indStateModemPin.value(1)
                     data_server = {}
-                    data_server["ID"] = 1
+                    data_server["ID"] = self.ID
                     data_server["cmd"] = "READY"
-
                     self._send_data_to_server_(data_server)
                     gprs_t_count = 0
                     while (gprs_t_count < 20):
@@ -368,9 +368,8 @@ class Device:
                 self.indStateGPRSPin.value(0)
 
                 gprs_t_count = 0
-                while (gprs_t_count < 30):
+                while (gprs_t_count < 5):
                     gprs_t_count = gprs_t_count + 1
-#!!!!!!!!!!!!!
                     #self.gsm.proc_at_data()
 
         except KeyboardInterrupt as e:
@@ -416,7 +415,7 @@ class Device:
                 finddev = True
         if(finddev!=True):
             ret = {}
-            ret["msg"] = "Error"
+            ret["msg"] = "ERROR DEV_ID"
             return ret
 
         data_out = bytearray()
@@ -426,13 +425,23 @@ class Device:
         #ModBus._add_crc_to_bytearray_(data_out)
         #data_out.extend(b'\x')
         #print("write data",data_out)
+        count_repeat = 3
         self._send_req_(data_out)
 
-        data = self._read_ans_()
-        print("data = ", data)
+        while(count_repeat !=0):
+            data = self._read_ans_()
+            if (len(data) > 25):
+                ret = self._alldata_modbus_to_strct_(data)
+                if(ret.get("devID") == dev):
+                    return ret
+                count_repeat = count_repeat - 1
+            else:
+                count_repeat = count_repeat - 1
+        #data = self._read_ans_()
+        #print("data = ", data)
         #print("len(data) = ", len(data))
-        if(len(data)>25):
-            ret = self._alldata_modbus_to_strct_(data)
+        #if(len(data)>25):
+        #    ret = self._alldata_modbus_to_strct_(data)
         if (len(data) == 0):
             ret= {}
             ret["msg"]="Error"
@@ -440,13 +449,27 @@ class Device:
         return ret
 
     def SetCtrlData(self, cmd_dict):
+        """
 
-        
-        pass
+        :param cmd_dict: {"devID":1,"reg":"01"}
+        :return:
+        """
+        print("cmd_dict = ", cmd_dict)
+        print("type cmd_dict = ", type(cmd_dict))
+        self.uDevice.flush()
+        data_out = bytearray()
+        data_out.extend(struct.pack('b', cmd_dict.get("devID")))
+        data_out.extend(b'\x06')
+        data_out.extend(b'\x20\x0b')
+        data_out.extend(struct.pack('>H', cmd_dict.get("reg")))
+        self.modbus._add_crc_to_bytearray_(data_out)
+        self._send_req_(data_out)
+        return cmd_dict
+
 
     def SetDevData(self,cmd_dict):
         """
-        From server comes a command like {"cmd":"SETDATA","ID":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"18:22:26"}
+        From server comes a command like {"Iust":[0.15],"Uust":[0.25],"reg":"01"}
 
         :param cmd_dict:    dict param
         :return: register value from device as type 'dict', or
@@ -459,13 +482,16 @@ class Device:
         #if(cmd_dict.get("cmd")==None):
         #    return "Error"
 
-        Iust=cmd_dict.get("msg").get("Iust")
-        Uust = cmd_dict.get("msg").get("Uust")
+        Iust=cmd_dict.get("Iust")
+        Uust = cmd_dict.get("Uust")
+        reg = cmd_dict.get("reg")
         #float(str(data_dev_iust)[1:-1])
         print("Iust SetDevData")
-        print(cmd_dict.get("msg").get("Iust"))
+        print(cmd_dict.get("Iust"))
         print("Uust SetDevData")
-        print(cmd_dict.get("msg").get("Uust"))
+        print(cmd_dict.get("Uust"))
+        print("reg SetDevData")
+        print(cmd_dict.get("reg"))
         if (Iust != None):
             #print("Iust = ",Iust)
             Iust = float(str(Iust)[1:-1])
@@ -473,35 +499,42 @@ class Device:
             Iust = int(Iust)
             #print("Iusti = ", Iust)
             data_out = bytearray()
-            data_out.extend(struct.pack('b', cmd_dict.get("ID")))
+            data_out.extend(struct.pack('b', cmd_dict.get("devID")))
             data_out.extend(b'\x06')
-            data_out.extend(b'\x20\x09')
+            data_out.extend(b'\x20\x0A')
             data_out.extend(struct.pack('>H', Iust))
             self.modbus._add_crc_to_bytearray_(data_out)
             self._send_req_(data_out)
             data = self._read_ans_()
-            print("data _read_ans_ = ", data)
+            print("data _read_ans_ = Iust ", data)
 
-            #print("data_out",data_out)
-
-            #print("Iust type ", type(cmd_dict.get("Iust").get("Iust")))
-            pass
-        if (cmd_dict.get("msg").get("Uust") != None):
+        if (Uust != None):
             Uust = float(str(Uust)[1:-1])
             Uust = Uust * 100
             Uust = int(Uust)
             # print("Iusti = ", Iust)
             data_out = bytearray()
-            data_out.extend(struct.pack('b', cmd_dict.get("ID")))
+            data_out.extend(struct.pack('b', cmd_dict.get("devID")))
             data_out.extend(b'\x06')
-            data_out.extend(b'\x20\x0A')
+            data_out.extend(b'\x20\x09')
             data_out.extend(struct.pack('>H', Uust))
             self.modbus._add_crc_to_bytearray_(data_out)
             self._send_req_(data_out)
             data = self._read_ans_()
-            print("data _read_ans_ = ", data)
-            pass
-        pass
+            print("data _read_ans_ Uust = ", data)
+
+        if (reg != None):
+            self.uDevice.flush()
+            data_out = bytearray()
+            data_out.extend(struct.pack('b', cmd_dict.get("devID")))
+            data_out.extend(b'\x06')
+            data_out.extend(b'\x20\x0b')
+            data_out.extend(struct.pack('>H', cmd_dict.get("reg")))
+            self.modbus._add_crc_to_bytearray_(data_out)
+            self._send_req_(data_out)
+            data = self._read_ans_()
+            print("data _read_ans_ reg = ", data)
+
 
     def GetAllData(self):
         for dev in self.dict_devices:
@@ -513,6 +546,7 @@ class Device:
     def _alldata_modbus_to_strct_(self, buff):
         """
         Analis buffer from device, on request get all registers
+        buff - not  error
         :param buff:    input buffer
         :return:
                 data from device in type 'dict'
@@ -563,7 +597,7 @@ class Device:
             data_to_server = {}
             data_to_server["msg"] = data_device
             data_to_server["timestamp"] = "10:10:10"
-            print(data_to_server)
+            #print(data_to_server)
 
             return data_to_server
         except NameError as e:
@@ -600,7 +634,8 @@ class Device:
             # Проверяем переполнение буффера
             if(len(read_buff)>100):
                 print("!!!!!!!!!!!!!!!!   Error Overflow modbus in buffer")
-                read_buff.clear()
+                print("read_buff = ",read_buff)
+                read_buff = bytearray()
                 self.uDevice.flush()
                 return read_buff
         return read_buff
@@ -638,6 +673,8 @@ class Device:
             except ValueError as e:
                 print("-------except ValueError in _analis_server_socket_buff_")
                 return
+            if (in_data.get("ID")!=self.ID):
+                return
             # in_data = str
             print("in_data = ", in_data)
             print("-----_analis_server_socket_buff_------")
@@ -659,7 +696,7 @@ class Device:
                     # print("data_dev_id = ", data_dev_id)
                     #data = self.GetDevData(data_dev_id)
                     data_device = {}
-                    data_device["ID"] = dev
+                    data_device["ID"] = self.ID
                     data_device["msg"] = data["msg"]
                     data_device["cmd"] = "DATA"
                     data_device["timestamp"] = timestamp
@@ -673,16 +710,14 @@ class Device:
                 print("cmd=GETDATA")
                 timestamp = in_data.get("timestamp")
                 #data_dev_id = int(in_data.get("cmd")[len("GETDATA"):])
-                data_dev_id = int(in_data.get("id"))
+                data_dev_id = int(in_data.get("msg").get("devID"))
                 #print("data_dev_id = ", data_dev_id)
                 data = self.GetDevData(data_dev_id)
                 data_device = {}
-                data_device["ID"] = data_dev_id
+                data_device["ID"] = self.ID
                 data_device["msg"] = data["msg"]
                 data_device["cmd"] = "DATA"
                 data_device["timestamp"] = timestamp
-
-
 
                 print("self.GetDevData(data_dev_id) = ", data)
                 #print("type(data) = ", type(data))
@@ -693,8 +728,16 @@ class Device:
             if (in_data.get("cmd").find("SETCTRL") == 0):
                 #print("SETCTRL to dev")
                 data_dev_id = int(in_data.get("msg").get("devID"))
+                timestamp = in_data.get("timestamp")
                 print("SETCTRL to dev - ",data_dev_id)
-                self.SetCtrlData(in_data)
+                data = self.SetCtrlData(in_data.get("msg"))
+                print("SETCTRL data - ", data)
+                data_device = {}
+                data_device["ID"] = self.ID
+                data_device["msg"] = data
+                data_device["cmd"] = "SETCTRL"
+                data_device["timestamp"] = timestamp
+                self._send_data_to_server_(data_device)
 
                 pass
 
@@ -702,7 +745,8 @@ class Device:
                 # пришла команда опроса установки параметров
                 print("SETDATA")
                 #data_dev_id = int(in_data.get("cmd")[len("SETDATA"):])
-                data_dev_id = int(in_data.get("ID"))
+                data_dev_id = int(in_data.get("msg").get("devID"))
+                timestamp = in_data.get("timestamp")
                 print("data_dev_id = ", data_dev_id)
                 data_dev_reg = in_data.get("msg").get("reg")
                 data_dev_iust = in_data.get("msg").get("Iust")
@@ -715,24 +759,31 @@ class Device:
                 #print(str(data_dev_iust)[1:-1])
                 #print(str(data_dev_uust)[1:-1])
 
-                self.SetDevData(in_data)
+                data = self.SetDevData(in_data.get("msg"))
 
-                data_dev_iust = float(str(data_dev_iust)[1:-1])
-                data_dev_uust = float(str(data_dev_uust)[1:-1])
+                data_device = {}
+                data_device["ID"] = self.ID
+                data_device["msg"] = in_data.get("msg")
+                data_device["cmd"] = "SETDATA"
+                data_device["timestamp"] = in_data.get("timestamp")
+                self._send_data_to_server_(in_data)
 
-                data_out = bytearray()
+                #data_dev_iust = float(str(data_dev_iust)[1:-1])
+                #data_dev_uust = float(str(data_dev_uust)[1:-1])
 
-                if(data_dev_id != None):
-                    data_out.extend(struct.pack('b', data_dev_id))
-                if (data_dev_reg != None):
-                    data_out.extend(struct.pack('b', data_dev_reg))
-                if (data_dev_iust != None):
-                    data_out.extend(struct.pack('f', data_dev_iust))
-                if (data_dev_uust != None):
-                    data_out.extend(struct.pack('f', data_dev_uust))
+                #data_out = bytearray()
 
-                data_out.extend(b'\xaa')
-                print(data_out)
+                #if(data_dev_id != None):
+                #    data_out.extend(struct.pack('b', data_dev_id))
+                #if (data_dev_reg != None):
+                #    data_out.extend(struct.pack('b', data_dev_reg))
+                #if (data_dev_iust != None):
+                #    data_out.extend(struct.pack('f', data_dev_iust))
+                #if (data_dev_uust != None):
+                #    data_out.extend(struct.pack('f', data_dev_uust))
+
+                #data_out.extend(b'\xaa')
+                #print(data_out)
                 # self._send_req_(data_out)
                 # сформировали выходной буффер, можем отправлять
                 #print("devID = ", data_dev_id)
@@ -746,6 +797,11 @@ class Device:
             print(e)
         except Exception as e:
             print("!!!!!!!!!!!!!!!  except Exception in _analis_server_socket_buff_   !!!!!!!!")
+            data_device = {}
+            data_device["ID"] = self.ID
+            data_device["msg"] = in_data.get("msg")
+            data_device["cmd"] = "ERROR TYPE"
+            self._send_data_to_server_(data_device)
             print(e)
         finally:
             #print("!!!!!!!!!!!!!!!  except finally in _analis_server_socket_buff_   !!!!!!!!")
@@ -914,26 +970,26 @@ device = Device()
 
 
 
-in_buff = bytearray([6, 0, 0,128, 0, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5 ,5 ,5,6,7,7])
-data_server = '{"cmd":"SETDATA0","msg": {"reg": 6, "Iust": [1.5e-1], "Uust": [2.5e-1]}, "timestamp": "10:10:10"}'
-data_to_server = device._read_buff_to_json_(in_buff)
-print("------------------------------------------------")
-print(data_to_server)
-print("------------------------------------------------")
-print(ujson.dumps(data_to_server))
-print("------------------------------------------------")
+#in_buff = bytearray([6, 0, 0,128, 0, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5 ,5 ,5,6,7,7])
+#data_server = '{"cmd":"SETDATA0","msg": {"reg": 6, "Iust": [1.5e-1], "Uust": [2.5e-1]}, "timestamp": "10:10:10"}'
+#data_to_server = device._read_buff_to_json_(in_buff)
+#print("------------------------------------------------")
+#print(data_to_server)
+#print("------------------------------------------------")
+#print(ujson.dumps(data_to_server))
+#print("------------------------------------------------")
 
 
-print("------------------------------------------------")
+#print("------------------------------------------------")
 
-print("------------------------------------------------")
-print("------------------------------------------------")
+#print("------------------------------------------------")
+#print("------------------------------------------------")
 
 
 
 
 #device.StartThrReciveSocket()
-k = 0
+#k = 0
 
 #while True:
 #    device.MainThread()
