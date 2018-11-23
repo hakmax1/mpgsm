@@ -1,6 +1,10 @@
 Project description
 
 
+-=-=-=-=-=-=-==-=-      Add
+
+in _analis_server_socket_buff_ add
+
 sudo i2cdump -y 0 0x6f
 sudo i2cset -y 0 0x29 0x54 0x01
 
@@ -82,13 +86,41 @@ mpgsm.device.uDevice.any()
 
 http://185.41.186.74:1880/data
 
-buff = '{"cmd":"SETDATA","ID":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}'
-buff = '{"cmd":"GETDATA","id":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}'
+buff = '{"cmd":"SETDATA","ID":1,"msg":{"devID":1,"Iust":[1.15],"Uust":[3.25],"reg":10},"timestamp":"11:41:10"}'
 mpgsm.device._analis_server_socket_buff_(buff)
 
-/*          ---------------------       debug command "GETALLDATA"      ----------------------         */
-buff = '{"cmd":"GETALLDATA","id":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}'
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"1","msg":{"devID":1,"Iust":[3.10],"Uust":[3.20],"reg":2},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"1","msg":{"devID":1,"Iust":[3.10],"reg":2},"timestamp":"11:41:10"}')
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":1,"Iust":[3.10],"reg":2},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"1"},"timestamp":"15:40:00"}')
+
+
+
+
+{"cmd":"GETDATA","ID":"1","msg":{"devID":"1"},"timestamp":"15:40:00"}
+
+buff = '{"cmd":"GETDATA","id":6,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}'
+
+buff = '{"cmd":"GETDATA","id":1,"msg":{"devID":1,"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}'
 mpgsm.device._analis_server_socket_buff_(buff)
+
+
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"1","msg":{"devID":"1"},"timestamp":"15:40:00"}')
+
+
+/*          ---------------------       debug command "GETALLDATA"      ----------------------         */
+
+
+buff = '{"cmd":"GETALLDATA","id":'1',"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}'
+mpgsm.device._analis_server_socket_buff_(buff)
+
+/*          ---------------------       debug command "SETCTRL"         ----------------------         */
+buff = '{"cmd":"SETCTRL","id":1,"msg":{"devID":1,"reg":10},"timestamp":"11:41:10"}'
+mpgsm.device._analis_server_socket_buff_(buff)
+
 
 01062009000f120c
 data=bytearray(b'\x01\x06 \t\x00\x0f\x12\x0c')
@@ -102,7 +134,7 @@ mpgsm.device.gsm.send_at_req(mpgsm.device.gsm.cmd_AT)
 
 
 
-cmd_dict ={"cmd":"SETDATA","ID":1,"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}
+cmd_dict ={"cmd":"SETDATA","ID":'1',"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}
 
 
 
@@ -128,3 +160,9 @@ self.uDevice = UART(2, baudrate=9600, rx=16, tx=17, timeout=3000)
 Данные должны быть в реальном времени?
 
 
+ #1 work Постоянно моргаем, индикация работы процессора
+ #2 Горит когда есть связь с модемом(модем ответил на АТ команды)
+ #3 GPRS Горит когда в режиме GPRS
+ #4 Моргает когда есть ошибки (какие пока не понятно)
+ #5 Резервный
+ #6 Резервный

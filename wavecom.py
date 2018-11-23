@@ -73,7 +73,16 @@ class wavecom:
 
     # Подключаем канал GPRS, возвращает True и переходит в режим чтения данных
     def connect_to_gprs(self):
-        # Настройка соеденения
+        """
+        Настройка соеденения
+        AT+WIPCFG=1
+        AT+WIPBR=1,6
+        AT+WIPBR=2,6,11,"internet"
+        AT+WIPBR=4,6,0
+
+        :return:
+        """
+        #
         self.uGSM = UART(1, baudrate=115200, rx=22, tx=23, timeout=3000)
         #self.uGSM.callback(self.uGSM.CBTYPE_PATTERN, self.uart_cb_func, pattern=b'\r\n')
         print("connect to device...")
@@ -159,7 +168,14 @@ class wavecom:
                 #print("except ValueError in _get_str_from_line is ok")
                 pass
             if (len(stroka) > 0):
-                print("_get_str_from_line(self,ln) len(stroka) > 0")
+                print("_get_str_from_line(self,ln) len(stroka) > 0 = ",len(stroka))
+                #j=0
+                #for i in stroka:
+                #    print("j = ", j)
+                #    print("stroka[j] = ", i)
+                #    j = j+1
+
+                print("stroka[0]",stroka[0])
                 return stroka[0]
             else:
                 print("_get_str_from_line(self,ln) len(stroka) = 0")
@@ -183,7 +199,7 @@ class wavecom:
         else:
             self.uGSM.flush()
             # здесь проверяем наличие новых смс
-            self.uGSM.write('AT+CMGL="ALL"\r\n')
+            self.uGSM.write('AT+CMGL="REC UNREAD"\r\n')
             stroka = self._get_str_from_line(self.uGSM.readln(1000))
             ans = list()
             while(stroka!=None):
@@ -213,7 +229,13 @@ class wavecom:
             if(self.cb_exec_server_data !=None):
                 self.cb_exec_server_data(stroka)
 
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!          Not work errore
     def send_at_req(self,at_cmd):
+        """
+            Send AT request and read answer
+        :param at_cmd:
+        :return:
+        """
         # Отправляем ат команду
         self._responce = at_cmd['cmd_resp']
         self._f_resp_ok = False
@@ -225,7 +247,7 @@ class wavecom:
             if(len(read_str)>0):
                 if(read_str[0] == at_cmd['cmd_resp']):
                     self._f_resp_ok = True
-                    self.uGSM.flush()
+                    #self.uGSM.flush()
                     break
             read_str = self.uGSM.readln(at_cmd['time_out'])
         return self._f_resp_ok

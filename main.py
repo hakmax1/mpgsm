@@ -1,7 +1,7 @@
 #   Halkin Maksim
 
 import time
-print("ESP32 GSM Controll Module")
+print("ESP32 GSM Controll Module ver 1.20")
 
 time.sleep(2)
 
