@@ -258,7 +258,7 @@ class wavecom:
             read_str = self.uGSM.readln(at_cmd['time_out'])
         return self._f_resp_ok
         pass
-
+    #
     def GetSMS(self,num):
         """
 
