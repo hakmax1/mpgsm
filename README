@@ -93,6 +93,10 @@ mpgsm.device._analis_server_socket_buff_(buff)
 mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"1","msg":{"devID":1,"Iust":[3.10],"Uust":[3.20],"reg":2},"timestamp":"11:41:10"}')
 mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"1","msg":{"devID":1,"Iust":[3.10],"reg":2},"timestamp":"11:41:10"}')
 
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"1","msg":{"devID":1,"Iust":[3.10],"reg":2},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"1","msg":{"devID":"1"},"timestamp":"15:40:00"}')
+
 mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":1,"Iust":[3.10],"reg":2},"timestamp":"11:41:10"}')
 mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"1"},"timestamp":"15:40:00"}')
 
@@ -111,6 +115,8 @@ mpgsm.device._analis_server_socket_buff_(buff)
 mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"1","msg":{"devID":"1"},"timestamp":"15:40:00"}')
 
 
+mpgsm.device.GetDevData(1)
+
 /*          ---------------------       debug command "GETALLDATA"      ----------------------         */
 
 
@@ -120,6 +126,47 @@ mpgsm.device._analis_server_socket_buff_(buff)
 /*          ---------------------       debug command "SETCTRL"         ----------------------         */
 buff = '{"cmd":"SETCTRL","id":1,"msg":{"devID":1,"reg":10},"timestamp":"11:41:10"}'
 mpgsm.device._analis_server_socket_buff_(buff)
+
+
+
+
+/*          ---------------------       debug SMS                       ----------------------         */
+mpgsm.device.gsm.uGSM.write('AT+CMGL="REC UNREAD"\r\n')
+
+mpgsm.device.gsm.send_at_req({'cmd':"AT\r\n",'cmd_resp':'OK','time_out':1000,'delay':0,'skip':0})
+
+mpgsm.device.gsm.uGSM.write('AT+CMGL="REC UNREAD"\r\n')
+
+AT+CMGDA="DEL ALL"
+
+
+mpgsm.device.gsm.send_at_req(cmd_READSMS)
+
+mpgsm.device.gsm.GetSMS(1)
+
+
+mpgsm.device.gsm.uGSM.write('AT+CMGDA="DEL ALL"\r\n')
+mpgsm.device.gsm.uGSM.write('AT+CMGD=1\r\n')
+
+
+mpgsm.device.gsm.uGSM.write('AT+CMGR=1\r\n')
+mpgsm.device.gsm.uGSM.readln(1000)
+
+
+mpgsm.device.gsm.uGSM.write('AT\r\n')
+mpgsm.device.gsm.uGSM.any()
+mpgsm.device.gsm.uGSM.readln(1000)
+
+mpgsm.device.gsm.uGSM.write('at+cusd=1,*100#,15\r\n')
+"at+cusd=1,*111#,15"
+
+
+mpgsm.device.gsm.uGSM.write('AT+CSQ\r\n')
+
+mpgsm.device.gsm.uGSM.write('AT+CREG\r\n')
+
+mpgsm.device.gsm.uGSM.write('AT+CMGF=1\r\n')
+AT+CMGF=1
 
 
 01062009000f120c
@@ -166,3 +213,101 @@ self.uDevice = UART(2, baudrate=9600, rx=16, tx=17, timeout=3000)
  #4 Моргает когда есть ошибки (какие пока не понятно)
  #5 Резервный
  #6 Резервный
+
+
+
+
+
+ mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"1","msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":14,"reg":2,"Iust":[15]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":15,"reg":2,"Iust":[15]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":16,"reg":2,"Iust":[15]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":17,"reg":2,"Iust":[15]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":18,"reg":2,"Iust":[15]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":19,"reg":2,"Iust":[15]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":20,"reg":2,"Iust":[15]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":21,"reg":2,"Iust":[5]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":22,"reg":2,"Iust":[5]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":23,"reg":2,"Iust":[5]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":24,"reg":2,"Iust":[5]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":25,"reg":2,"Iust":[5]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":26,"reg":2,"Iust":[15]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":27,"reg":2,"Iust":[15]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":28,"reg":2,"Iust":[15]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":29,"reg":2,"Iust":[15]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":30,"reg":2,"Iust":[15]},"timestamp":"11:41:10"}')
+
+
+i=0
+while i<30
+    mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":%d,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}'%i)
+
+
+
+
+i=1
+while i<32:
+print("Test dev num - ",i)
+mpgsm.device.GetDevData(i)
+i=i+1
+
+
+
+
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":14,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":15,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":16,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":17,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":18,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":19,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":20,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":21,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":22,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":23,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":24,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":25,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":26,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":27,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":28,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":29,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"SETDATA","ID":"2","msg":{"devID":30,"reg":2,"Iust":[0]},"timestamp":"11:41:10"}')
+
+
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"2"},"timestamp":"15:40:00"}')
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"14"},"timestamp":"15:40:00"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"15"},"timestamp":"15:40:00"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"16"},"timestamp":"15:40:00"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"17"},"timestamp":"15:40:00"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"18"},"timestamp":"15:40:00"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"19"},"timestamp":"15:40:00"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"20"},"timestamp":"15:40:00"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"21"},"timestamp":"15:40:00"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"22"},"timestamp":"15:40:00"}')
+
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"23"},"timestamp":"15:40:00"}')
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"24"},"timestamp":"15:40:00"}')
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"25"},"timestamp":"15:40:00"}')
+
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"26"},"timestamp":"15:40:00"}')
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"27"},"timestamp":"15:40:00"}')
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"28"},"timestamp":"15:40:00"}')
+
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"29"},"timestamp":"15:40:00"}')
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"30"},"timestamp":"15:40:00"}')
+
+
+
+
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"14"},"timestamp":"15:40:00"}')
+mpgsm.device._analis_server_socket_buff_('{"cmd":"GETDATA","ID":"2","msg":{"devID":"14"},"timestamp":"15:40:00"}')
