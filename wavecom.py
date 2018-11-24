@@ -30,8 +30,9 @@
 #        4	timeval	integer, message time as unix time
 #        5	tz	integer, message time zone
 #        6	msg	string, message text
-
-
+#
+#
+#       http://smstools3.kekekasvi.com/topic.php?id=288
 
 
 import time
@@ -266,17 +267,19 @@ class wavecom:
         :return: None, if not read sms
         """
         cmd_READSMS = {'cmd': "AT+CMGR=%d\r\n"%num, 'cmd_resp': "AT+CMGR=%d"%num, 'time_out': 1000, 'delay': 0, 'skip': 0}
-        print(cmd_READSMS)
+        #print(cmd_READSMS)
         res = self.send_at_req(cmd_READSMS)
         ret = {}
         ret["ERROR"] = "ERROR"
         if(res):
+            time.sleep(1)
             # req ok, wait OK or ERROR
             while True:
                 s = self.uGSM.readln(100)
                 print("s = ",s)
                 if(s !=None):
                     if(s.startswith('+CMGR')==True):
+                        ret["state"] = s.split(',')[0]
                         ret["phone"] = s.split(',')[1]
                         ret["text"] = self.uGSM.readln(100).split()
                         ret["ERROR"] = "OK"
@@ -289,3 +292,29 @@ class wavecom:
                         return ret
                 else:
                     return ret
+
+    def DelSMS(self, num):
+        """
+
+        :param num: number for delete SMS
+        :return:    True or False
+        """
+        cmd_DELSMS = {'cmd': "AT+CMGD=%d\r\n" % num, 'cmd_resp': "AT+CMGD=%d" % num, 'time_out': 1000, 'delay': 0,
+                       'skip': 0}
+        return self.send_at_req(cmd_DELSMS)
+
+    def ExecSMSText(self,sms_struct):
+        """
+        Exec command from SMS
+        :param sms_struct: dict for SMS struct
+        :return: True if ok exec
+        """
+    def ProcSMS(self):
+        """
+        Exec cmd from sms
+        :return:
+        """
+        endproc = False
+        while (endproc != True):
+            sms = self.GetSMS()
+            pass
