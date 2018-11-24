@@ -167,7 +167,7 @@ class Device:
         print("init uDevice")
         self.ID = "1"
         # Номера ус-в
-        self.dict_devices = (1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30)
+        self.dict_devices = (1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31)
         #self.registrPhoneNumbers = "+380665168235"
         self.registrPhoneNumbers = ["+380688810836","+380665168235"]
         self.gsmAPN = 'internet'
@@ -335,7 +335,7 @@ class Device:
                     data_server["cmd"] = "READY"
                     self._send_data_to_server_(data_server)
                     gprs_t_count = 0
-                    while (gprs_t_count < 20):
+                    while (gprs_t_count < 60):
                         gprs_t_count = gprs_t_count + 1
                         self.gsm.proc_server_data()
                 else:

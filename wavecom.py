@@ -11,8 +11,10 @@
 #
 #   Переводим для СМС
 #   AT+CSCS= "GSM"
-#   AT+CMGF=0
-#   AT+CMGF=1
+#   AT+CMGF=0   digit mode
+#   AT+CMGF=1   text mode
+
+
 #   +CMTI: "SM",4    пришло смс
 #   AT+CMGL="ALL"
 #   AT+CMGDA="DEL ALL"      ("DEL READ","DEL UNREAD","DEL SENT","DEL UNSENT")
@@ -71,6 +73,10 @@ class wavecom:
 
         self.cmd_STOP_READ_DATA = {'cmd': '+++', 'cmd_resp': 'CONNECT', 'time_out': 6000, 'delay': 0, 'skip': 0}
 
+        self.cmd_READSMS = {'cmd': "AT\r\n", 'cmd_resp': 'OK', 'time_out': 1000, 'delay': 0, 'skip': 0}
+
+        self.uGSM = UART(1, baudrate=115200, rx=22, tx=23, timeout=3000)
+
     # Подключаем канал GPRS, возвращает True и переходит в режим чтения данных
     def connect_to_gprs(self):
         """
@@ -83,7 +89,7 @@ class wavecom:
         :return:
         """
         #
-        self.uGSM = UART(1, baudrate=115200, rx=22, tx=23, timeout=3000)
+
         #self.uGSM.callback(self.uGSM.CBTYPE_PATTERN, self.uart_cb_func, pattern=b'\r\n')
         print("connect to device...")
         res = self.send_at_req(self.cmd_AT)
@@ -252,3 +258,34 @@ class wavecom:
             read_str = self.uGSM.readln(at_cmd['time_out'])
         return self._f_resp_ok
         pass
+
+    def GetSMS(self,num):
+        """
+
+        :param num:
+        :return: None, if not read sms
+        """
+        cmd_READSMS = {'cmd': "AT+CMGR=%d\r\n"%num, 'cmd_resp': "AT+CMGR=%d"%num, 'time_out': 1000, 'delay': 0, 'skip': 0}
+        print(cmd_READSMS)
+        res = self.send_at_req(cmd_READSMS)
+        ret = {}
+        ret["ERROR"] = "ERROR"
+        if(res):
+            # req ok, wait OK or ERROR
+            while True:
+                s = self.uGSM.readln(100)
+                print("s = ",s)
+                if(s !=None):
+                    if(s.startswith('+CMGR')==True):
+                        ret["phone"] = s.split(',')[1]
+                        ret["text"] = self.uGSM.readln(100).split()
+                        ret["ERROR"] = "OK"
+                        return ret
+                    if(s.startswith('OK')==True):
+                        ret["ERROR"] = "OK"
+                        return ret
+                    if(s.startswith('ERROR')==True):
+                        ret["ERROR"] = "ERROR"
+                        return ret
+                else:
+                    return ret
