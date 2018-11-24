@@ -183,7 +183,7 @@ class Device:
         #Событие из внешнего процесса на подключение к GSM
         self.evConnectGsm = False
 
-        self.uDevice = UART(2, baudrate=9600, rx=16, tx=17, timeout=3000)
+        self.uDevice = UART(2, baudrate=9600, rx=16, tx=17, timeout=1000)
         #self.uGSMModule =
         self.count_pol_sec = 0
         self.count_tuggle_pol_sec = 0
@@ -405,7 +405,7 @@ class Device:
     def GetDevData(self, dev):
         """
         Get all data from device
-        :param dev: id(num) device
+        :param dev: id(num) device, type integer
         :return: register value from device as type 'dict', or ['msg':'Error'] if not read data
         """
         self.uDevice.flush()
@@ -415,28 +415,28 @@ class Device:
                 finddev = True
         if(finddev!=True):
             ret = {}
-            ret["msg"] = "ERROR DEV_ID"
+            ret["msg"] = "ERROR DEV_ID NOT PRESENT"
             return ret
 
         data_out = bytearray()
         data_out.extend(struct.pack('b', dev))
         data_out.extend(b'\x03\x20\x00\x00\x0C')
         self.modbus._add_crc_to_bytearray_(data_out)
-        #ModBus._add_crc_to_bytearray_(data_out)
-        #data_out.extend(b'\x')
-        #print("write data",data_out)
+
         count_repeat = 3
         self._send_req_(data_out)
-
         while(count_repeat !=0):
             data = self._read_ans_()
             if (len(data) > 25):
                 ret = self._alldata_modbus_to_strct_(data)
-                if(ret.get("devID") == dev):
+                if(ret.get("msg").get("devID") == dev):
                     return ret
+                #print("Not eqal devID = ", ret.get("msg").get("devID"))
                 count_repeat = count_repeat - 1
             else:
                 count_repeat = count_repeat - 1
+            print("repeat _send_req_, count = ",count_repeat)
+            self._send_req_(data_out)
         #data = self._read_ans_()
         #print("data = ", data)
         #print("len(data) = ", len(data))
