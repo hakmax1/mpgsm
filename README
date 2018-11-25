@@ -1,6 +1,12 @@
 Project description
 
 
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-          SMS commands        -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+        APN name_apn                set apn
+        IP ip_address ip_port       set ip_address and port
+        START                       start gprs connection
+
+
 -=-=-=-=-=-=-==-=-      Add
 
 in _analis_server_socket_buff_ add
@@ -143,6 +149,12 @@ AT+CMGDA="DEL ALL"
 mpgsm.device.gsm.send_at_req(cmd_READSMS)
 
 mpgsm.device.gsm.GetSMS(1)
+mpgsm.device.gsm.DetSMS(1)
+
+
+    mpgsm.device.gsm.cmd_CREATE_TCP_CLIENT
+
+mpgsm.device._sms_cmd_exec_("APN")
 
 
 mpgsm.device.gsm.uGSM.write('AT+CMGDA="DEL ALL"\r\n')
@@ -154,6 +166,7 @@ mpgsm.device.gsm.uGSM.readln(1000)
 
 
 mpgsm.device.gsm.uGSM.write('AT\r\n')
+mpgsm.device.gsm.uGSM.readln(1000)
 mpgsm.device.gsm.uGSM.any()
 mpgsm.device.gsm.uGSM.readln(1000)
 
@@ -181,6 +194,7 @@ mpgsm.device.gsm.send_at_req(mpgsm.device.gsm.cmd_AT)
 
 
 
+f = open('config.json')
 cmd_dict ={"cmd":"SETDATA","ID":'1',"msg":{"Iust":[0.15],"Uust":[0.25]},"timestamp":"11:41:10"}
 
 

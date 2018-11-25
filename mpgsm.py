@@ -29,7 +29,7 @@ import _thread
 import time
 #parsed = ujson.loads("""{"name":"John"}""")
 
-print("Hello, this is GSM module")
+#print("Hello, this is GSM module")
 print(os.listdir())
 
 #gsm.debug(True)
@@ -169,10 +169,18 @@ class Device:
         # Номера ус-в
         self.dict_devices = (1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31)
         #self.registrPhoneNumbers = "+380665168235"
+
+        self.ConfigModule = {}
+        # default config
+
         self.registrPhoneNumbers = ["+380688810836","+380665168235"]
+
         self.gsmAPN = 'internet'
         self.gsmsocket_ip = '185.41.186.74'
-        self.gsmsocket_port = 2020
+        self.gsmsocket_port = 2021
+
+
+
         self.isDataFromServer = False
         self.isDataToServer = False
         self.datafromserver = bytearray()
@@ -205,6 +213,15 @@ class Device:
         self.gsm.cb_exec_server_data = self._analis_server_socket_buff_
         self._send_data_to_server_ = self.gsm.send_data_to_server
 
+        print("Init configuration")
+
+        #f = open('config.json', 'w')
+
+
+        self.gsm.cmd_CREATE_TCP_CLIENT = {'cmd': 'AT+WIPCREATE=2,1,"%s",%d\r\n'%(self.gsmsocket_ip,self.gsmsocket_port), 'cmd_resp': 'OK',
+                                      'time_out': 6000,
+                                      'delay': 0, 'skip': 0}
+
 
         self.StartThrTimePolSec()
 
@@ -219,7 +236,10 @@ class Device:
         #self.serversock.settimeout(0.5)
         #self.serversock.connect(('185.41.186.74', 2020))
 
-
+    def LoadConfig(self,fname):
+        pass
+    def SaveConfig(self,fname):
+        pass
     def ConnectToGSM(self):
         """
         Connect via GSM to server socket
